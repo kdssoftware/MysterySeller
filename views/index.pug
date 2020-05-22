@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1="welcome to MysterySeller, "+user.name
+  form(method="post", action="/user/name")
+    input(name="name", type="text", placeholder="your user name", value=user.name)
+    button(type="submit") update your name
+  p Go to a room using the room link or create a new one below
+  br
+  if room
+    a(href="/room")="you are currently in room "+room.name
+  else
+    a(href="/create") create a room
+    br
+    p you dont have a room

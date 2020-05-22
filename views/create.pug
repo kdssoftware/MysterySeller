@@ -1,0 +1,8 @@
+extends layout
+
+block content
+    h1 create a new room
+    form(method="post", action="/create")
+        input(name="name", type="text", placeholder="name of your room")
+        input(name="description", type="text", placeholder="optional description")
+        button(type="submit", value="create new room") create new room

@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    h1="Room "+room.name
+    p=room.description
+    a(href="/room/leave") leave this room
+    p users in this room:
+        each u in room.users
+            p=u.name

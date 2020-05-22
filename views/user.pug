@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    h1="hello, "+user.name
+    p="your id: "+user.id
+    form(method="post", action="/user/name")
+        input(name="name", type="text", placeholder="your user name", value=user.name)
+        button(type="submit") update your name
+
