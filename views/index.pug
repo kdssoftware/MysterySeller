@@ -1,10 +1,7 @@
 extends layout
 
 block content
-  h1="welcome to MysterySeller, "+user.name
-  form(method="post", action="/user/name")
-    input(name="name", type="text", placeholder="your user name", value=user.name)
-    button(type="submit") update your name
+  h1 Welcome to MysterySeller
   p Go to a room using the room link or create a new one below
   br
   if room

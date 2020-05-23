@@ -10,6 +10,9 @@ var createRouter = require('./routes/create');
 var userRouter = require('./routes/user');
 var app = express();
 var ugen = require('username-generator');
+var {server} = require('./bin/www');
+const io = require('socket.io')(server);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -25,19 +28,24 @@ var sess = {
 };
 
 if (app.get('env') === 'production') {
-  app.set('trust proxy', 1) // trust first proxy
+  app.set('trust proxy', 1); // trust first proxy
   sess.cookie.secure = true // serve secure cookies
 }
 
 app.use(session(sess));
+//every request middleware
 app.use((req,res,next)=>{
   if(!req.session.user){
     req.session.user = {
-      name:ugen.generateUsername(),
+      name:ugen.generateUsername(' '),
       id:req.session.id
     }
   }
-  console.log(req.session);
+  if(req.session.room){ //if use is in a room, stringify and put in session as json
+    //store json as locals
+    req.session.jroom = JSON.stringify(req.session.room);
+  }
+  res.locals = req.session;
   next();
 });
 app.use('/', indexRouter);

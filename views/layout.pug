@@ -4,4 +4,24 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
+    p=user.name
+    p=user.id
+    form(method="post", action="/user/name")
+      input(name="name", type="text", placeholder="your user name", value=user.name)
+      button(type="submit") update your name
+    hr
     block content
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js' integrity='sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=' crossorigin='anonymous')
+    script.
+      const socket = io.connect('http://localhost:3000');
+      if("#{jroom}"!=='') {
+        let room;
+        room = JSON.parse("#{jroom}".replace(/&quot;/g,'"'));
+        if (room !== "") {
+          socket.on('roomUpdate', function (data) {
+            console.log("room was updated: "+data);
+          });
+        } else {
+          console.log('not in room');
+        }
+      }

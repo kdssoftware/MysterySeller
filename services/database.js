@@ -19,11 +19,25 @@ exports.createRoom = (user,data={}) => {
     return newRoom;
 };
 
-exports.editRoom = (roomId,newData={}) => {
+exports.editRoom = (roomId,newData) => {
     let indexOfRoom = this.getRoomIndex(roomId);
     let roomData = this.getRoomData(roomId);
     rooms[indexOfRoom].name = (newData.name)?newData.name:roomData.name;
     rooms[indexOfRoom].description = (newData.description)?newData.description:roomData.description;
+    if(newData.users){ //if users need editing (updating)
+        let currentListedUserIndex = 0;
+        newData.users.forEach((u)=>{ //update all users listed
+            let currentEditUserIndex = 0;
+           rooms[indexOfRoom].users.forEach((ru)=>{ //find the users currently in loop
+                if(u.id===ru.id){//user found in room
+                    rooms[indexOfRoom].users[currentEditUserIndex].name = newData.users[currentListedUserIndex].name;
+                }else{
+                    currentEditUserIndex++;
+                }
+           });
+           currentListedUserIndex++;
+        });
+    }
     let newRoomData = this.getRoomData(roomId);
     return newRoomData;
 };
@@ -54,9 +68,11 @@ exports.getRoomData =  (roomId) => {
 };
 
 exports.getRoomIndex = (roomId) => {
-    let indexOfRoom = -1;
+    let indexOfRoom = 0;
     rooms.forEach((r)=>{
+        console.log('looking for index...');
         if(r.id===roomId){
+            console.log("found the room index! "+(indexOfRoom));
             return indexOfRoom;
         }
         indexOfRoom++;
@@ -66,7 +82,10 @@ exports.getRoomIndex = (roomId) => {
 
 exports.joinRoom = (user,roomId) => {
     let indexOfRoom = this.getRoomIndex(roomId);
-    rooms[indexOfRoom].users.push({user});
+    //check if user is already in room
+    console.log(indexOfRoom);
+    console.log(rooms);
+    rooms[indexOfRoom].users.push(user);
     console.log(rooms);
     return roomId;
 };
