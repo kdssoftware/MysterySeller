@@ -18,7 +18,6 @@ router.get('/', function(req, res, next) {
 router.get('/leave',function(req,res,next){
   if(req.session.room){
     //removes roomId in sesion
-    console.log(req.session.user.name+' left room '+req.session.room.name);
     database.leaveRoom(req.session.user,req.session.room.id);
     req.session.room = null;
   }
@@ -39,16 +38,18 @@ router.get('/:roomId',function(req,res,next){
       //find the room
       let room = database.getRoomData(req.params.roomId);
       if (room == null) {
-        //if no room was foudn
+        //if no room was found
         res.render('error', {"message": "room not found", "error": {status: 500, stack: "manual error"}});
         return;
       }else {
         //if room was found
-        database.joinRoom(req.session.user, room.id);
+        let roomId = database.joinRoom(req.session.user, room.id);
+        if(!roomId){
+          res.render('error', {"message": "This room is busy", "error": {status: 500, stack: "manual error"}});
+        }
         //log into that room
         req.session.room = room;
-        console.log(req.session.user.name+' joined room '+room.name);
-        res.render('room')
+        res.redirect('/room/'+req.params.roomId);
       }
     } else {
       //if roomId is not valid

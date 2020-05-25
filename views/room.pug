@@ -1,18 +1,90 @@
-extends layout
+extends layout_room
 
 block content
-    h1="Room "+room.name
-    p=room.description
-    a(href="/room/leave") leave this room
-    ul#users users in this room:
-        each u in room.users
-            li=u.name
+    div#playingField
+        h1="Room "+room.name
+        p=room.description
+        if user.id === room.vip.id
+            a(href="#leave") you are the VIP, you cant leave this room
+            button(type='button', role="button", value="start the game", id='start') start the game
+        else
+            a(href="#" id="leave") leave this room
+        ul#users users in this room:
+            each u in room.users
+                if room.vip.id === u.id
+                    li(id=u.id)=u.name+' <-- VIP'
+                else
+                    li(id=u.id)=u.name
+
 
     script.
         const socket = io();
         user = JSON.parse("#{juser}".replace(/&quot;/g, '"'));
         room = JSON.parse("#{jroom}".replace(/&quot;/g, '"'));
+        let roomstart =
+                "<p id='currentPlayer'></p>"+
+                "<div id='item'></div>"+
+                "<div id='status'> </div>"+
+                "<div id='text'> </div>";
         socket.emit('join',user,room);
-        socket.on('join', function (data) {
-            $('#users').append("<li>"+data.name+"</li>");
+        socket.on('user joined', function (data) {
+            $('#users').append("<li id='"+data.id+"'>"+data.name+"</li>");
         });
+        socket.on('user left',function(data){
+            $('#'+data.id).remove();
+        });
+        $("#leave").click(function(){
+           socket.emit('leave',me,room,function(location){
+               window.location.href = location;
+           });
+        });
+        $("#start").click(function(){
+            socket.emit('start game',user,room);
+            start(user);
+        });
+        socket.on('start game', function(data,item){
+            start(data,item);
+        });
+        socket.on('next player',function(data,item){
+           start(data,item);
+        });
+        function start(data,item){
+            $('#playingField').html('');
+            $("#playingField").html(roomstart);
+            console.log(item);
+            if (data.id === user.id) {
+                startTimer(true);
+                $("#currentPlayer").text(data.name + ' is the mystery seller');
+                $("#text").text('You are the mystery seller!');
+                $("#item").text("");
+            } else {
+                startTimer(false);
+                $("#currentPlayer").text(data.name + ' is the mystery seller');
+                $("#text").text('Listen to the mystery seller');
+                $("#item").text(item);
+            }
+        }
+        function startTimer(isPlaying) {
+            var countDownDate = new Date(Date.now());
+            countDownDate.setMinutes(countDownDate.getMinutes() + 2);
+            var x = setInterval(function () {
+                // Get today's date and time
+                var now = new Date().getTime();
+                // Find the distance between now and the count down date
+                var distance = countDownDate - now;
+                // Time calculations for days, hours, minutes and seconds
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                // Display the result in the element with id="demo"
+                document.getElementById("status").innerHTML = minutes + ":" + seconds;
+
+                // If the count down is finished, write some text
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("status").innerHTML = "Your time is up!";
+                    if(isPlaying) {
+                        socket.emit('next player', room);
+                    }
+                }
+            }, 1000);
+        }

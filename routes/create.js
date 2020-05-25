@@ -15,7 +15,8 @@ router.post('/',function(req,res,next){
     if(req.body.name){
         let newRoom = database.createRoom(req.session.user,{
             name:req.body.name,
-            description:req.body.description
+            description:req.body.description,
+            amount:req.body.amount
         });
         req.session.room = newRoom;
         res.redirect('/room/'+newRoom.id);

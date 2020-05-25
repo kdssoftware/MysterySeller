@@ -10,6 +10,7 @@ var createRouter = require('./routes/create');
 var userRouter = require('./routes/user');
 var app = express();
 var ugen = require('username-generator');
+var database = require('./services/database');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = 3000;
@@ -25,7 +26,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 var sess = {
-  secret: 'keyboard cat',
+  secret:String.raw`),c0 N^Yx! W4c-!e7792+y$\\FSyc+!}=73e`,
   cookie: {}
 };
 
@@ -40,7 +41,8 @@ app.use((req,res,next)=>{
   if(!req.session.user){
     req.session.user = {
       name:ugen.generateUsername(' '),
-      id:req.session.id
+      id:req.session.id,
+      plays:0
     }
   }
   req.session.juser = JSON.stringify(req.session.user);
@@ -69,19 +71,65 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+let currentlyInRoomUsers = [];
 io.on('connection',(socket) => {
   console.log('running on socket: '+ socket.id);
   socket.on('join',(user,room)=>{
-
-    socket.join(room.id);
-    io.to(room.id).emit('join',user);
-
+    let userInRoom = false;
+    currentlyInRoomUsers.forEach((u)=>{
+      if(u===user.id){
+        userInRoom = true;
+      }
+    });
+    if(!userInRoom){
+      socket.join(room.id);
+      socket.to(room.id).emit('user joined',user);
+      currentlyInRoomUsers.push(user.id);
+      console.log("[socket.io] join: "+user.name+' joined the room');
+    }else{
+      console.log("[socket.io] join: "+user.name+' already joined a room');
+    }
   });
-  socket.on('leave', (user,room)=> {
-    io.to(room.id).emit('left',user);
+  socket.on('leave', (user,room,fn)=> {
+    let userInRoom = false;
+    let userIndex = 0;
+    currentlyInRoomUsers.forEach((u)=>{
+      if(u===user.id){
+        userInRoom = true;
+        currentlyInRoomUsers.splice(userIndex,1);
+      }
+      userIndex++;
+    });
+    if(userInRoom){
+      socket.to(room.id).emit('user left',user);
+      socket.leave(room.id);
+      console.log("[socket.io] leave: "+user.name+' left the room');
+    }else{
+      console.log("[socket.io] leave: "+user.name+' already left a room');
+    }
+    fn('/room/leave');
+  });
 
-    socket.leave(room.id);
+  socket.on('user joined',(user,room)=>{
+    socket.to(room.id).emit('user joined',user);
+    console.log("[socket.io] user joined: "+user.name+' joined the room');
+  });
+
+  socket.on('user left',(user,room)=>{
+    socket.to(room.id).emit('user left',user);
+    console.log("[socket.io] user left: "+user.name+' joined the room');
+  });
+
+  socket.on('start game', (user,room)=>{
+    database.startRoom(user,room.id);
+    console.log("[socket.io] start game: game has started on room "+room.name);
+    console.log("[socket.io] start game: currently playing: "+user.name);
+    socket.to(room.id).emit('start game',database.getCurrentPlayer(room.id),database.getFirstItem(room.id));
+  });
+  socket.on('next player',(room)=>{
+    database.nextPlayer(room.id);
+    console.log("[socket.io] next round");
+    socket.to(room.id).emit('next player',database.getCurrentPlayer(room.id),database.getFirstItem(room.id));
   });
 });
 
