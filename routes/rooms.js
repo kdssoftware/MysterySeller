@@ -39,8 +39,8 @@ router.get('/:roomId',function(req,res,next){
       let room = database.getRoomData(req.params.roomId);
       if (room == null) {
         //if no room was found
-        res.render('error', {"message": "room not found", "error": {status: 500, stack: "manual error"}});
-        return;
+        //res.render('error', {"message": "room not found", "error": {status: 500, stack: "manual error"}});
+        res.redirect('/');
       }else {
         //if room was found
         let roomId = database.joinRoom(req.session.user, room.id);

@@ -126,10 +126,16 @@ io.on('connection',(socket) => {
     console.log("[socket.io] start game: currently playing: "+user.name);
     socket.to(room.id).emit('start game',database.getCurrentPlayer(room.id),database.getFirstItem(room.id));
   });
+
   socket.on('next player',(room)=>{
     database.nextPlayer(room.id);
     console.log("[socket.io] next round");
-    socket.to(room.id).emit('next player',database.getCurrentPlayer(room.id),database.getFirstItem(room.id));
+    let item = database.getFirstItem(room.id);
+    if(!item){//no items no more
+      socket.to(room.id).emit('end game');
+    }else{
+      socket.to(room.id).emit('next player',database.getCurrentPlayer(room.id),item);
+    }
   });
 });
 

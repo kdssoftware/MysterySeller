@@ -167,6 +167,10 @@ exports.removeFirstItem = (roomId)=>{
 };
 
 exports.getFirstItem = (roomId) =>{
-    this.removeFirstItem(roomId);
-    return rooms[this.getRoomIndex(roomId)].items[0];
+    if(rooms[this.getRoomIndex(roomId)].items.length===0){
+     return null;
+    }else{
+        this.removeFirstItem(roomId);
+        return rooms[this.getRoomIndex(roomId)].items[0];
+    }
 };
