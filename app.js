@@ -10,9 +10,11 @@ var createRouter = require('./routes/create');
 var userRouter = require('./routes/user');
 var app = express();
 var ugen = require('username-generator');
-var {server} = require('./bin/www');
-const io = require('socket.io')(server);
-
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const port = 3000;
+const socketsExport = require('./services/socket');
+exports.io = io;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -41,6 +43,7 @@ app.use((req,res,next)=>{
       id:req.session.id
     }
   }
+  req.session.juser = JSON.stringify(req.session.user);
   if(req.session.room){ //if use is in a room, stringify and put in session as json
     //store json as locals
     req.session.jroom = JSON.stringify(req.session.room);
@@ -67,4 +70,20 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+io.on('connection',(socket) => {
+  console.log('running on socket: '+ socket.id);
+  socket.on('join',(user,room)=>{
+
+    socket.join(room.id);
+    io.to(room.id).emit('join',user);
+
+  });
+  socket.on('leave', (user,room)=> {
+    io.to(room.id).emit('left',user);
+
+    socket.leave(room.id);
+  });
+});
+
+
+http.listen(port, () => console.log('listening on port ' + port));

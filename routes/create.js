@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var database = require('../services/database');
-
+const io = require('../app');
+const socket = require('../services/socket');
 /* GET create listing. */
 router.get('/', function(req, res, next) {
     if(req.session.room){

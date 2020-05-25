@@ -4,6 +4,15 @@ block content
     h1="Room "+room.name
     p=room.description
     a(href="/room/leave") leave this room
-    p users in this room:
+    ul#users users in this room:
         each u in room.users
-            p=u.name
+            li=u.name
+
+    script.
+        const socket = io();
+        user = JSON.parse("#{juser}".replace(/&quot;/g, '"'));
+        room = JSON.parse("#{jroom}".replace(/&quot;/g, '"'));
+        socket.emit('join',user,room);
+        socket.on('join', function (data) {
+            $('#users').append("<li>"+data.name+"</li>");
+        });

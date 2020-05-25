@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h1 Welcome to MysterySeller
+  h1 Welcome to rooms
   p Go to a room using the room link or create a new one below
   br
   if room
@@ -10,3 +10,13 @@ block content
     a(href="/create") create a room
     br
     p you dont have a room
+    #rooms
+
+  script.
+
+    var socket = io();
+    socket.on('create', function (data) {
+      console.log(data);
+      $('#rooms').append('<a href="http://localhost:3000/"'+data.room.id+'> Room '+data.room.name+' created by '+data.vip.name+'</a>')
+    });
+

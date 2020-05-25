@@ -13,7 +13,8 @@ exports.createRoom = (user,data={}) => {
         id : newRoomId,
         name:data.name,
         description:data.description,
-        users:[user]
+        users:[user],
+        vip:user
     };
     rooms.push(newRoom);
     return newRoom;
@@ -55,12 +56,11 @@ exports.deleteRoom = (roomId) => {
 
 //If a room was found, receives the room data otherwise NULL
 exports.getRoomData =  (roomId) => {
-    console.log('getRoomData of '+roomId);
+
     let found = null;
     rooms.forEach((r) => {
         console.log(r);
        if (roomId == r.id){
-           console.log("found room",r);
            found = r;
        }
     });
@@ -70,9 +70,7 @@ exports.getRoomData =  (roomId) => {
 exports.getRoomIndex = (roomId) => {
     let indexOfRoom = 0;
     rooms.forEach((r)=>{
-        console.log('looking for index...');
         if(r.id===roomId){
-            console.log("found the room index! "+(indexOfRoom));
             return indexOfRoom;
         }
         indexOfRoom++;
@@ -83,19 +81,19 @@ exports.getRoomIndex = (roomId) => {
 exports.joinRoom = (user,roomId) => {
     let indexOfRoom = this.getRoomIndex(roomId);
     //check if user is already in room
-    console.log(indexOfRoom);
-    console.log(rooms);
     rooms[indexOfRoom].users.push(user);
-    console.log(rooms);
+
     return roomId;
 };
 
 exports.leaveRoom = (user,roomId) => {
+    console.log(user+' is leaving '+roomId);
     let indexOfRoom = this.getRoomIndex(roomId);
     let indexOfUser = 0;
-    rooms[indexOfRoom].users.forEach((u)=>{
+    let thisRoom = rooms[indexOfRoom];
+    thisRoom.users.forEach((u)=>{
         if(u.id === user.id){
-            return rooms[indexOfRoom].users.splice(indexOfUser,1);
+            return thisRoom.users.splice(indexOfUser,1);
         }
         indexOfRoom++;
     });
