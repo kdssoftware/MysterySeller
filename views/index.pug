@@ -1,22 +1,23 @@
 extends layout
 
 block content
-  h1 Welcome to rooms
-  p Go to a room using the room link or create a new one below
-  br
-  if room
-    a(href="/room")="you are currently in room "+room.name
-  else
-    a(href="/create") create a room
-    br
-    p you dont have a room
-    #rooms
-
-  script.
-
-    var socket = io();
-    socket.on('create', function (data) {
-      console.log(data);
-      $('#rooms').append('<a href="http://localhost:3000/"'+data.room.id+'> Room '+data.room.name+' created by '+data.vip.name+'</a>')
-    });
+  .row.align-items-center.h-100
+    .mx-auto
+      h1.display-4 Welcome to Mystery Seller
+      .row.align-items-center.h-100
+        .mx-auto
+          p.lead A game where friends tries to sell an mystery item
+  hr
+  .row.align-items-center.h-100
+    .mx-auto
+      form.form(method="post", action='/room')
+        .form-group
+          label(for='roomcode') Room code
+          input#roomCode.form-control(name='roomCode', type='text', placeholder="Enter room code")
+        .form-group
+          label(for='name') Name
+          input#name.form-control(name='name', type='text', placeholder="enter your name")
+        .row
+          .mx-auto
+            button.btn.btn-primary(type='submit') Play
 

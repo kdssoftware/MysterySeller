@@ -13,6 +13,14 @@ router.get('/', function(req, res, next) {
     res.redirect('/');
   }
 });
+router.post('/',function(req,res,next){
+  let name = req.body.name;
+  let roomCode = req.body.roomCode;
+  if(req.session.user){
+    req.session.user.name = name;
+  }
+  res.redirect('/room/'+roomCode);
+});
 
 // Get /room/leave , leaves the room the user is signed into
 router.get('/leave',function(req,res,next){

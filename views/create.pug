@@ -1,9 +1,23 @@
 extends layout
 
 block content
-    h1 create a new room
-    form(method="post", action="/create")
-        input(name="name", type="text", placeholder="name of your room")
-        input(name="description", type="text", placeholder="optional description")
-        input(name="amount",type="number",placeholder="amount of items")
-        button(type="submit", value="create new room") create new room
+    .row.align-items-center.h-100
+        .mx-auto
+            h1.display-4 Create a new room
+    hr
+    .row.align-items-center.h-100
+        .mx-auto
+            form.form(method="post", action="/create")
+                .form-group
+                    label(for='roomname') Name of your room
+                    input#roomname.form-control(name="name", type="text", placeholder="name of your room")
+                .form-group
+                    label(for='description') Name of your room
+                    input#description.form-control(name="description", type="text", placeholder="optional description")
+                .form-group
+                    label(for='amount') Lenght of the game
+                    input#amount.custom-range(name='amount', type='range' min='5' max='25' step='1')
+                .row
+                    .mx-auto
+                        button.btn.btn-primary(type="submit") Create room
+

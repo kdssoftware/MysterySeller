@@ -123,18 +123,23 @@ io.on('connection',(socket) => {
   socket.on('start game', (user,room)=>{
     database.startRoom(user,room.id);
     console.log("[socket.io] start game: game has started on room "+room.name);
-    console.log("[socket.io] start game: currently playing: "+user.name);
-    socket.to(room.id).emit('start game',database.getCurrentPlayer(room.id),database.getFirstItem(room.id));
+    let currentplayer = database.getCurrentPlayer(room.id);
+    console.log("[socket.io] start game: currently playing: "+currentplayer.name);
+    let currentItem = database.getFirstItem(room.id);
+    database.removeFirstItem(room.id);
+    console.log("[socket.io] start game: current item: "+currentItem);
+    io.in(room.id).emit('start game',currentplayer,currentItem);
   });
 
   socket.on('next player',(room)=>{
     database.nextPlayer(room.id);
     console.log("[socket.io] next round");
     let item = database.getFirstItem(room.id);
+    database.removeFirstItem(room.id);
     if(!item){//no items no more
-      socket.to(room.id).emit('end game');
+      io.in(room.id).emit('end game');
     }else{
-      socket.to(room.id).emit('next player',database.getCurrentPlayer(room.id),item);
+      io.in(room.id).emit('next player',database.getCurrentPlayer(room.id),item);
     }
   });
 });

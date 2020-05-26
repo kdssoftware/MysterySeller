@@ -1,0 +1,28 @@
+nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+    a.navbar-brand(href='/') Mystery Seller
+    button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarNavAltMarkup' aria-controls='navbarNavAltMarkup' aria-expanded='false' aria-label='Toggle navigation')
+        span.navbar-toggler-icon
+    #navbarNavAltMarkup.collapse.navbar-collapse
+        ul.navbar-nav.mr-auto
+            if room
+                li.nav-item.active
+                    a.nav-link(href='/room')
+                        span="In room '" + room.name + "'"
+                        span.sr-only (current)
+                if user.id === room.vip.id
+                    li.nav-item
+                        a.nav-link(href='/room/leave')="Delete room '" + room.name + "'"
+                else
+                    li.nav-item
+                        a.nav-link(href='/room/leave')="Leave room '" + room.name + "'"
+            else
+                li.nav-item
+                    a.nav-link.active(href='/create') Create a room
+        .my-2.my-lg-0
+            if !room
+                form.form-inline.my-2.my-sm-0(method="post", action="/user/name")
+                    input.form-control.mr-sm-2(name="name", type="text", placeholder="your user name", value=user.name)
+                    button.btn.btn-success.my-2.my-sm-0(type="submit") update your name
+            else
+                button.btn.btn-success.my-2.my-sm-0( disabled="")=user.name
+

@@ -63,10 +63,8 @@ exports.deleteRoom = (roomId) => {
 
 //If a room was found, receives the room data otherwise NULL
 exports.getRoomData =  (roomId) => {
-
     let found = null;
     rooms.forEach((r) => {
-        console.log(r);
        if (roomId == r.id){
            found = r;
        }
@@ -112,6 +110,7 @@ exports.leaveRoom = (user,roomId) => {
 };
 
 exports.startRoom = (user,roomId) => {
+    console.log("current player is: ",user);
     this.editRoom(roomId,{busy:true,currentlyPlaying:{user},users:[{name:user.name,id:user.id,plays:1}]});
 };
 exports.stopRoom = (roomId) => {
@@ -128,20 +127,23 @@ exports.nextPlayer = (roomId)=>{
     let playerFound = false;
     rooms[roomIndex].users.forEach((u)=>{
        if(u.plays===rooms[roomIndex].playedRounds){
-           rooms[roomIndex].currentlyPlaying = u;
+           console.log('current player is:',u);
+           rooms[roomIndex].currentlyPlaying.user = u;
            rooms[roomIndex].users[indexOfUser].plays++;
            playerFound = true;
        }
        indexOfUser++;
     });
     if(!playerFound){//next round, 1 first player in list now playing
+        console.log('starting next round');
+        console.log('current player is:',rooms[roomIndex].users[0]);
         rooms[roomIndex].playedRounds++;
         rooms[roomIndex].users[0].plays++;
-        rooms[roomIndex].currentlyPlaying = rooms[roomIndex].users[0];
+        rooms[roomIndex].currentlyPlaying.user = rooms[roomIndex].users[0];
     }
 };
 exports.getCurrentPlayer = (roomId) =>{
-    return rooms[this.getRoomIndex(roomId)].currentlyPlaying;
+    return rooms[this.getRoomIndex(roomId)].currentlyPlaying.user;
 };
 
 exports.getRandomItems =(amount)=>{
@@ -170,7 +172,6 @@ exports.getFirstItem = (roomId) =>{
     if(rooms[this.getRoomIndex(roomId)].items.length===0){
      return null;
     }else{
-        this.removeFirstItem(roomId);
         return rooms[this.getRoomIndex(roomId)].items[0];
     }
 };
